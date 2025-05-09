@@ -35,17 +35,6 @@ jobs:
       run: terraform init
       working-directory: infra
 
-    - name: Import existing resources
-      run: |
-        terraform import aws_iam_role.lambda_exec_role lambda-url-shortener-role
-        terraform import aws_dynamodb_table.url_shortener url-shortener-table
-        terraform import aws_lambda_function.create_url_shortener create-url-shortener
-      working-directory: infra
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: us-east-1
-
     - name: Plan Terraform
       run: terraform plan -out=tfplan
       working-directory: infra
