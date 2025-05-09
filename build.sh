@@ -11,7 +11,7 @@ for LAMBDA in "${LAMBDAS[@]}"; do
   PACKAGE_DIR="${LAMBDA_DIR}/package"
 
   # Caminho absoluto do zip
-  ZIP_PATH="$(pwd)/src/lambdas/${LAMBDA}/lambda.zip"
+  ZIP_PATH="$(pwd)/src/lambdas/${LAMBDA}/lambda_${LAMBDA}.zip"
 
   # Verifica se o caminho do zip está correto
   if [ -z "$ZIP_PATH" ]; then
