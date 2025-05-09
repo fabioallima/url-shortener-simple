@@ -97,6 +97,9 @@ Arquivo: `.github/workflows/deploy.yml`
 * **DynamoDB**: Guarda os mapeamentos entre URLs curtas e longas.
 * **Terraform**: Gerencia Lambda, DynamoDB, IAM e outras dependências.
 * **GitHub Actions**: Automatiza o deploy completo.
+* **Secrets**: AWS_ACCESS_KEY_ID e AWS_SECRET_ACCESS_KEY são usados para autenticação.
+* **Build**: O script `build.sh` empacota a função Lambda e suas dependências em um arquivo ZIP.
+* **Deploy**: O Terraform aplica as mudanças na infraestrutura, criando ou atualizando os recursos necessários.
 
 ---
 
