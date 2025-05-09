@@ -115,7 +115,6 @@ terraform destroy
 
 * Certifique-se de que os **secrets da AWS** estão configurados corretamente no GitHub.
 * Para customizar a região AWS ou caminho do ZIP, edite `infra/variables.tf`.
-
----
-
-Se quiser, posso gerar também um badge de status da pipeline no topo do README. Deseja isso?
+* O arquivo `build.sh` deve ter permissão de execução. Use `chmod +x build.sh` se necessário.
+* O arquivo `lambda_create_url.zip` deve ser atualizado sempre que houver mudanças na função Lambda.
+* O DynamoDB tem custos associados. Monitore o uso e limpe os recursos quando não forem mais necessários.
