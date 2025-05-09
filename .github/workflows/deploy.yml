@@ -35,6 +35,14 @@ jobs:
       run: terraform init
       working-directory: infra
 
+    - name: Destroy existing resources
+      run: terraform destroy -auto-approve
+      working-directory: infra
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: us-east-1
+
     - name: Plan Terraform
       run: terraform plan -out=tfplan
       working-directory: infra
