@@ -15,6 +15,6 @@ resource "aws_lambda_function" "create_url_shortener" {
   }
 
   lifecycle {
-    ignore_changes = [name]
+    ignore_changes = [function_name]
   }
 }
