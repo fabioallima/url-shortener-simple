@@ -7,4 +7,8 @@ resource "aws_dynamodb_table" "url_shortener" {
     name = "id"
     type = "S"
   }
+
+  lifecycle {
+    ignore_changes = [name]
+  }
 }

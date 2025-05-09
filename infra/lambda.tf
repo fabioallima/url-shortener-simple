@@ -13,4 +13,8 @@ resource "aws_lambda_function" "create_url_shortener" {
       TABLE_NAME = aws_dynamodb_table.url_shortener.name
     }
   }
+
+  lifecycle {
+    ignore_changes = [name]
+  }
 }

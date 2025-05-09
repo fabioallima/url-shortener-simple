@@ -11,6 +11,10 @@ resource "aws_iam_role" "lambda_exec_role" {
       }
     }]
   })
+
+    lifecycle {
+    ignore_changes  = [name]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_dynamodb_attach" {
