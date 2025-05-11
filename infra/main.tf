@@ -1,8 +1,7 @@
-#######################################################
-# Projeto: URL Shortener
-# Arquivo: main.tf
-# Função: Orquestra e organiza os recursos declarados
-#######################################################
+provider "aws" {
+  region = var.aws_region
+}
+
 
 # DynamoDB
 # Definido em dynamodb.tf

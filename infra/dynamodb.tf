@@ -11,4 +11,10 @@ resource "aws_dynamodb_table" "url_shortener" {
   lifecycle {
     ignore_changes = [name]
   }
+
+  tags = {
+    Name = "url-shortener-table"
+    Environment = "dev"
+    Project = "url-shortener"
+  }
 }
