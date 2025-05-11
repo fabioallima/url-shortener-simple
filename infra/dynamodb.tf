@@ -13,8 +13,8 @@ resource "aws_dynamodb_table" "url_shortener" {
   }
 
   tags = {
-    Name = "url-shortener-table"
+    Name        = "url-shortener-table"
     Environment = "dev"
-    Project = "url-shortener"
+    Project     = "url-shortener"
   }
 }

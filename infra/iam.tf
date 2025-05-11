@@ -12,14 +12,14 @@ resource "aws_iam_role" "lambda_exec_role" {
     }]
   })
 
-    lifecycle {
-    ignore_changes  = [name]
+  lifecycle {
+    ignore_changes = [name]
   }
 
   tags = {
-    Name = "lambda-url-shortener-role"
+    Name        = "lambda-url-shortener-role"
     Environment = "dev"
-    Project = "url-shortener"
+    Project     = "url-shortener"
   }
 }
 

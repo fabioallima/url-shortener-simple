@@ -2,6 +2,14 @@ provider "aws" {
   region = var.aws_region
 }
 
+required_providers {
+  aws = {
+    source  = "hashicorp/aws"
+    version = "~> 5.0"
+  }
+}
+
+
 
 # DynamoDB
 # Definido em dynamodb.tf

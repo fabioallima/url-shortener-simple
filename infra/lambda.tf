@@ -19,8 +19,8 @@ resource "aws_lambda_function" "create_url_shortener" {
   }
 
   tags = {
-    Name = "create-url-shortener"
+    Name        = "create-url-shortener"
     Environment = "dev"
-    Project = "url-shortener"
+    Project     = "url-shortener"
   }
 }

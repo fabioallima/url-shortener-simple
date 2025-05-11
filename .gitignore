@@ -4,3 +4,4 @@ __pycache__/
 .terraform/
 terraform.tfstate*
 /.idea/
+infra/.terraform.lock.hcl
