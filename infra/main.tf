@@ -1,15 +1,23 @@
-provider "aws" {
-  region = var.aws_region
-}
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
 
-required_providers {
-  aws = {
-    source  = "hashicorp/aws"
-    version = "~> 5.0"
+  backend "s3" {
+    bucket         = "url-shortener-terraform-state-dev"
+    key            = "terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-state-lock-dev"
+    encrypt        = true
   }
 }
 
-
+provider "aws" {
+  region = var.aws_region
+}
 
 # DynamoDB
 # Definido em dynamodb.tf
@@ -27,6 +35,14 @@ required_providers {
 
 # API Gateway (reservado para uso futuro)
 # - apigateway.tf
+
+# S3 Backend
+# Definido em s3.tf
+# - aws_s3_bucket.terraform_state
+# - aws_s3_bucket_versioning.terraform_state
+# - aws_s3_bucket_server_side_encryption_configuration.terraform_state
+# - aws_s3_bucket_public_access_block.terraform_state
+# - aws_dynamodb_table.terraform_state_lock
 
 # Outputs
 # Definidos em outputs.tf
