@@ -34,4 +34,8 @@ resource "aws_dynamodb_table" "terraform_state_lock" {
     Name        = "Terraform State Lock"
     Environment = var.environment
   }
+
+    lifecycle {
+    ignore_changes = [name]
+  }
 }
