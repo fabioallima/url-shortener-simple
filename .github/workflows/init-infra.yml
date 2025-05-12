@@ -23,7 +23,8 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    - name: Create temporary backend configuration
+    - name: Check if resources exist
+      id: check_resources
       run: |
         cd infra
         # Backup do arquivo main.tf original
@@ -35,13 +36,20 @@ jobs:
           backend "local" {}
         }
         EOF
-
-    - name: Initialize Terraform with local backend
-      run: |
-        cd infra
+        
+        # Inicializa o Terraform
         terraform init
+        
+        # Verifica se os recursos já existem
+        if terraform state list | grep -q "aws_s3_bucket.terraform_state" && \
+           terraform state list | grep -q "aws_dynamodb_table.terraform_state_lock"; then
+          echo "resources_exist=true" >> $GITHUB_OUTPUT
+        else
+          echo "resources_exist=false" >> $GITHUB_OUTPUT
+        fi
 
     - name: Create S3 and DynamoDB resources
+      if: steps.check_resources.outputs.resources_exist == 'false'
       run: |
         cd infra
         terraform apply -auto-approve -target=aws_s3_bucket.terraform_state -target=aws_s3_bucket_versioning.terraform_state -target=aws_s3_bucket_server_side_encryption_configuration.terraform_state -target=aws_s3_bucket_public_access_block.terraform_state -target=aws_dynamodb_table.terraform_state_lock
