@@ -52,20 +52,24 @@ jobs:
     - name: Terraform Format
       id: fmt
       run: terraform fmt -check
+      working-directory: infra
       continue-on-error: true
 
     - name: Initialize Terraform
       id: init
       run: terraform init
+      working-directory: infra
 
     - name: Terraform Validate
       id: validate
       run: terraform validate -no-color
+      working-directory: infra
 
     - name: Terraform Plan
       id: plan
       if: github.event_name == 'pull_request'
       run: terraform plan -no-color
+      working-directory: infra
       continue-on-error: true
 
     - name: Update Pull Request
@@ -99,3 +103,4 @@ jobs:
     - name: Apply Terraform
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: terraform apply -auto-approve
+      working-directory: infra
