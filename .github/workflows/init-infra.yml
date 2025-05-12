@@ -54,4 +54,4 @@ jobs:
     - name: Initialize Terraform with S3 backend
       run: |
         cd infra
-        terraform init -migrate-state 
+        echo "yes" | terraform init -migrate-state 
