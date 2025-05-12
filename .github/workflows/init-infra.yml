@@ -27,6 +27,31 @@ jobs:
       id: check_resources
       run: |
         cd infra
+        # Verifica se o bucket S3 existe
+        if aws s3api head-bucket --bucket url-shortener-terraform-state-dev 2>/dev/null; then
+          S3_EXISTS=true
+        else
+          S3_EXISTS=false
+        fi
+
+        # Verifica se a tabela DynamoDB existe
+        if aws dynamodb describe-table --table-name terraform-state-lock-dev 2>/dev/null; then
+          DYNAMODB_EXISTS=true
+        else
+          DYNAMODB_EXISTS=false
+        fi
+
+        # Se ambos existem, não precisa criar
+        if [ "$S3_EXISTS" = true ] && [ "$DYNAMODB_EXISTS" = true ]; then
+          echo "resources_exist=true" >> $GITHUB_OUTPUT
+        else
+          echo "resources_exist=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create temporary backend configuration
+      if: steps.check_resources.outputs.resources_exist == 'false'
+      run: |
+        cd infra
         # Backup do arquivo main.tf original
         cp main.tf main.tf.bak
         sed -i '/backend "s3"/,/}/d' main.tf
@@ -36,17 +61,12 @@ jobs:
           backend "local" {}
         }
         EOF
-        
-        # Inicializa o Terraform
+
+    - name: Initialize Terraform with local backend
+      if: steps.check_resources.outputs.resources_exist == 'false'
+      run: |
+        cd infra
         terraform init
-        
-        # Verifica se os recursos já existem
-        if terraform state list | grep -q "aws_s3_bucket.terraform_state" && \
-           terraform state list | grep -q "aws_dynamodb_table.terraform_state_lock"; then
-          echo "resources_exist=true" >> $GITHUB_OUTPUT
-        else
-          echo "resources_exist=false" >> $GITHUB_OUTPUT
-        fi
 
     - name: Create S3 and DynamoDB resources
       if: steps.check_resources.outputs.resources_exist == 'false'
@@ -55,6 +75,7 @@ jobs:
         terraform apply -auto-approve -target=aws_s3_bucket.terraform_state -target=aws_s3_bucket_versioning.terraform_state -target=aws_s3_bucket_server_side_encryption_configuration.terraform_state -target=aws_s3_bucket_public_access_block.terraform_state -target=aws_dynamodb_table.terraform_state_lock
 
     - name: Restore original configuration
+      if: steps.check_resources.outputs.resources_exist == 'false'
       run: |
         cd infra
         mv main.tf.bak main.tf
