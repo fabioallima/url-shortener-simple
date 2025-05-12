@@ -10,6 +10,8 @@ Este projeto implementa um encurtador de URLs **serverless** utilizando **AWS La
 * 🗃️ **DynamoDB**: Armazena o mapeamento entre URLs curtas e longas.
 * 🛠️ **Terraform**: Gerencia a infraestrutura na AWS.
 * 🤖 **GitHub Actions**: Automatiza o empacotamento e deploy.
+* 📦 **S3 Backend**: Armazena o estado do Terraform com versionamento.
+* 🔒 **DynamoDB Lock**: Garante exclusividade nas operações do Terraform.
 
 ---
 
@@ -31,7 +33,9 @@ Este projeto implementa um encurtador de URLs **serverless** utilizando **AWS La
 .
 ├── build.sh
 ├── infra/                         # Arquivos Terraform
-│   ├── main.tf
+│   ├── main.tf                    # Configuração principal
+│   ├── s3.tf                      # Configuração do backend S3
+│   ├── dynamodb.tf                # Configuração do DynamoDB
 │   └── ...
 ├── src/
 │   └── lambdas/
@@ -40,7 +44,56 @@ Este projeto implementa um encurtador de URLs **serverless** utilizando **AWS La
 │           └── requirements.txt
 └── .github/
     └── workflows/
-        └── deploy.yml            # Pipeline GitHub Actions
+        ├── deploy.yml            # Pipeline de deploy
+        └── init-infra.yml        # Pipeline de inicialização do backend
+```
+
+---
+
+## 🔧 Configuração do Backend Terraform
+
+O projeto utiliza um backend remoto no S3 com bloqueio de estado no DynamoDB:
+
+### Recursos Criados
+
+1. **Bucket S3** (`url-shortener-terraform-state-dev`):
+   - Armazena o estado do Terraform
+   - Versionamento habilitado
+   - Criptografia server-side
+   - Acesso público bloqueado
+
+2. **Tabela DynamoDB** (`terraform-state-lock-dev`):
+   - Gerencia o bloqueio do estado
+   - Evita conflitos em operações simultâneas
+   - Modo de cobrança sob demanda
+
+### Inicialização do Backend
+
+Para criar a infraestrutura do backend:
+
+1. Vá para a aba "Actions" no GitHub
+2. Selecione o workflow "Initialize Terraform Infrastructure"
+3. Clique em "Run workflow"
+
+O workflow vai:
+- Verificar se os recursos já existem
+- Criar o bucket S3 e a tabela DynamoDB se necessário
+- Configurar o backend do Terraform
+
+### Configuração no Terraform
+
+O backend é configurado em `infra/main.tf`:
+
+```hcl
+terraform {
+  backend "s3" {
+    bucket         = "url-shortener-terraform-state-dev"
+    key            = "terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-state-lock-dev"
+    encrypt        = true
+  }
+}
 ```
 
 ---
@@ -97,6 +150,8 @@ Arquivo: `.github/workflows/deploy.yml`
 * **DynamoDB**: Guarda os mapeamentos entre URLs curtas e longas.
 * **Terraform**: Gerencia Lambda, DynamoDB, IAM e outras dependências.
 * **GitHub Actions**: Automatiza o deploy completo.
+* **S3 Backend**: Armazena o estado do Terraform com versionamento.
+* **DynamoDB Lock**: Garante exclusividade nas operações.
 * **Secrets**: AWS_ACCESS_KEY_ID e AWS_SECRET_ACCESS_KEY são usados para autenticação.
 * **Build**: O script `build.sh` empacota a função Lambda e suas dependências em um arquivo ZIP.
 * **Deploy**: O Terraform aplica as mudanças na infraestrutura, criando ou atualizando os recursos necessários.
@@ -112,6 +167,8 @@ cd infra
 terraform destroy
 ```
 
+> ⚠️ **Atenção**: O bucket S3 e a tabela DynamoDB do backend não serão destruídos por padrão para proteger o estado do Terraform.
+
 ---
 
 ## 📌 Observações
@@ -121,3 +178,5 @@ terraform destroy
 * O arquivo `build.sh` deve ter permissão de execução. Use `chmod +x build.sh` se necessário.
 * O arquivo `lambda_create_url.zip` deve ser atualizado sempre que houver mudanças na função Lambda.
 * O DynamoDB tem custos associados. Monitore o uso e limpe os recursos quando não forem mais necessários.
+* O estado do Terraform é versionado no S3, permitindo rollback se necessário.
+* O bloqueio de estado no DynamoDB evita conflitos em operações simultâneas.
