@@ -65,23 +65,9 @@ jobs:
       run: terraform validate -no-color
       working-directory: infra
 
-    - name: Force Unlock State
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: |
-        cd infra
-        # Verifica se existe um lock e tenta removê-lo
-        if terraform force-unlock -force 2>&1 | grep -q "Error acquiring the state lock"; then
-          echo "State is locked, attempting to force unlock..."
-          LOCK_ID=$(terraform force-unlock -force 2>&1 | grep -o 'ID: [a-f0-9-]*' | cut -d' ' -f2)
-          if [ ! -z "$LOCK_ID" ]; then
-            echo "Found lock ID: $LOCK_ID"
-            terraform force-unlock -force "$LOCK_ID"
-          else
-            echo "No lock ID found"
-          fi
-        else
-          echo "No state lock found"
-        fi
+    - name: Force Unlock Terraform State
+      run: terraform force-unlock 7c141503-9d80-fdeb-b6dc-7745fb9930cd
+      continue-on-error: true
 
     - name: Terraform Plan
       id: plan
