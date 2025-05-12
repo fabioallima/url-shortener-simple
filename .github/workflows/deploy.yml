@@ -49,6 +49,11 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
+    - name: Remove Terraform State Lock
+      run: |
+        aws dynamodb get-item --table-name terraform-state-lock-dynamo --key '{"LockID": {"S": "url-shortener-terraform-state-dev/terraform.tfstate"}}' || echo "Lock not found"
+        aws dynamodb delete-item --table-name terraform-state-lock-dynamo --key '{"LockID": {"S": "url-shortener-terraform-state-dev/terraform.tfstate"}}' || echo "Failed to delete lock"
+
     - name: Terraform Format
       id: fmt
       run: terraform fmt -check
@@ -64,10 +69,6 @@ jobs:
       id: validate
       run: terraform validate -no-color
       working-directory: infra
-
-    - name: Force Unlock Terraform State
-      run: terraform force-unlock 7c141503-9d80-fdeb-b6dc-7745fb9930cd
-      continue-on-error: true
 
     - name: Terraform Plan
       id: plan
