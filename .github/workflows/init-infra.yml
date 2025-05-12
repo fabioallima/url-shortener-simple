@@ -26,7 +26,11 @@ jobs:
     - name: Create temporary backend configuration
       run: |
         cd infra
-        cat > backend.tf <<EOF
+        # Backup do arquivo main.tf original
+        cp main.tf main.tf.bak
+        sed -i '/backend "s3"/,/}/d' main.tf
+        cat >> main.tf <<EOF
+
         terraform {
           backend "local" {}
         }
@@ -42,10 +46,10 @@ jobs:
         cd infra
         terraform apply -auto-approve -target=aws_s3_bucket.terraform_state -target=aws_s3_bucket_versioning.terraform_state -target=aws_s3_bucket_server_side_encryption_configuration.terraform_state -target=aws_s3_bucket_public_access_block.terraform_state -target=aws_dynamodb_table.terraform_state_lock
 
-    - name: Remove temporary backend configuration
+    - name: Restore original configuration
       run: |
         cd infra
-        rm backend.tf
+        mv main.tf.bak main.tf
 
     - name: Initialize Terraform with S3 backend
       run: |
