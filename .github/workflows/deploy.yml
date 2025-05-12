@@ -100,6 +100,15 @@ jobs:
             body: output
           })
 
+    - name: Force Unlock State
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        cd infra
+        LOCK_ID=$(terraform force-unlock -force $(terraform workspace show) 2>&1 | grep -o 'ID: [a-f0-9-]*' | cut -d' ' -f2)
+        if [ ! -z "$LOCK_ID" ]; then
+          terraform force-unlock -force $LOCK_ID
+        fi
+
     - name: Apply Terraform
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: terraform apply -auto-approve
